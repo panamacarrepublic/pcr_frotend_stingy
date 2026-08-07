@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+.vercel
+
+# Build / compiler caches
+.swc/
+*.tsbuildinfo
+next-env.d.ts
+
+# Environment (keep the example template)
+.env
+.env.*
+!.env.example
+
+# Test coverage
+coverage/
+lcov.info
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo

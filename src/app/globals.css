@@ -1,0 +1,11 @@
+/* Global styles. MUI CssBaseline handles the reset; keep this minimal.
+   Do not add component styling here — use the MUI theme. */
+html,
+body {
+  height: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
