@@ -25,7 +25,7 @@ export const wizardSteps: WizardStepMeta[] = [
     id: "basics",
     illustration: "vehicle",
     fields: [
-      "data.price",
+      "price",
       "data.vin_number",
       "data.make_id",
       "data.model_id",
@@ -39,10 +39,10 @@ export const wizardSteps: WizardStepMeta[] = [
     fields: [
       "data.vehicle_type",
       "data.fuel_type",
-      "data.condition",
+      "condition",
       "data.transmission_type",
-      "data.province",
-      "data.district",
+      "province",
+      "district",
     ],
   },
   { id: "description", illustration: "writing", fields: ["title", "description", "professional_photos"] },

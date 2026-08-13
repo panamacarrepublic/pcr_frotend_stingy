@@ -1,7 +1,8 @@
 import { z } from "zod";
 
 import { listingMessages } from "../messages";
-import { optionalText } from "./helpers";
+import { itemConditionEnum } from "./enums";
+import { numeric, optionalText } from "./helpers";
 import { OTHER_MODEL, vehicleDataSchema } from "./vehicle.schema";
 
 // listing_photos: sort_order is 1..10, at least one photo required.
@@ -37,6 +38,13 @@ export const publishListingSchema = z.object({
   title: z.string().trim().min(5).max(150),
   description: optionalText(z.string().trim().max(2000)),
   professional_photos: z.boolean().default(false),
+  // Cross-vertical: identical for cars, parts and collectibles, so they live
+  // here instead of being repeated in every branch of `data`. Mirrors the
+  // backend's ListingCreate, where they sit at the top level too.
+  price: numeric().pipe(z.number().positive()),
+  condition: itemConditionEnum,
+  province: z.string().trim().min(1),
+  district: z.string().trim().min(1),
   // UI-only gate (not persisted): the terms checkbox must be checked to publish.
   terms_accepted: z.literal(true, {
     errorMap: () => ({ message: "Debes aceptar los términos y condiciones" }),

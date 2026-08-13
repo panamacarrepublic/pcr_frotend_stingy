@@ -35,7 +35,8 @@ export function PreviewStep() {
   const v = useWatch() as PublishListingForm;
   const data = v.data;
   const photos = (v.photos ?? []) as { url: string }[];
-  const priceNum = Number(data?.price);
+  // price/condition/province are the listing's, not the vehicle's.
+  const priceNum = Number(v.price);
   const s = listingMessages.steps.preview;
   const nav = listingMessages.nav;
 
@@ -44,9 +45,9 @@ export function PreviewStep() {
     data?.mileage ? `${data.mileage} km` : null,
     data?.fuel_type ? fuelTypeLabels[data.fuel_type] : null,
     data?.transmission_type ? transmissionLabels[data.transmission_type] : null,
-    data?.condition ? conditionLabels[data.condition] : null,
+    v.condition ? conditionLabels[v.condition] : null,
     data?.vehicle_type ? vehicleTypeLabels[data.vehicle_type] : null,
-    data?.province,
+    v.province,
   ].filter(Boolean) as (string | number)[];
 
   const makes = useMakes();

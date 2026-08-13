@@ -31,11 +31,15 @@ const defaultValues: DefaultValues<PublishListingInput> = {
   title: "",
   description: "",
   professional_photos: false,
+  // Cross-vertical fields: on the listing, not inside `data`.
+  price: "",
+  condition: undefined,
+  province: undefined,
+  district: "",
   terms_accepted: undefined,
   photos: [],
   data: {
     category: "cars",
-    price: "",
     vin_number: "",
     make_id: "",
     model_id: "",
@@ -44,10 +48,7 @@ const defaultValues: DefaultValues<PublishListingInput> = {
     year: "",
     vehicle_type: undefined,
     fuel_type: undefined,
-    condition: undefined,
     transmission_type: undefined,
-    province: undefined,
-    district: "",
   },
 };
 
