@@ -59,7 +59,7 @@ export function VehicleBasicsStep() {
       left={
         <Box sx={gridSx}>
           <RhfTextField
-            name="data.price"
+            name="price"
             label={f.price}
             placeholder={p.price}
             inputMode="decimal"

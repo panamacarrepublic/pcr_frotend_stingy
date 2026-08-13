@@ -5,9 +5,9 @@ const MAKE_ID = "11111111-1111-1111-1111-111111111111";
 const MODEL_ID = "22222222-2222-2222-2222-222222222222";
 
 // Values as they arrive from the form inputs (numbers as strings, blank optional).
+// price/condition/province/district are NOT here — they belong to the listing.
 const validVehicle = {
   category: "cars",
-  price: "18500",
   vin_number: "",
   make_id: MAKE_ID,
   model_id: MODEL_ID,
@@ -16,16 +16,12 @@ const validVehicle = {
   year: "2020",
   vehicle_type: "sedan",
   fuel_type: "gasoline",
-  condition: "used",
   transmission_type: "automatic",
-  province: "Panamá",
-  district: "Betania",
 };
 
 describe("vehicleDataSchema", () => {
   it("parses and coerces a valid vehicle", () => {
     const r = vehicleDataSchema.parse(validVehicle);
-    expect(r.price).toBe(18500);
     expect(r.year).toBe(2020);
     expect(r.mileage).toBe(45000);
     expect(r.make_id).toBe(MAKE_ID);
@@ -33,9 +29,12 @@ describe("vehicleDataSchema", () => {
     expect(r.vin_number).toBeUndefined(); // blank optional → undefined
   });
 
-  it("rejects a non-positive price", () => {
-    expect(vehicleDataSchema.safeParse({ ...validVehicle, price: "0" }).success).toBe(false);
-    expect(vehicleDataSchema.safeParse({ ...validVehicle, price: "" }).success).toBe(false);
+  it("no longer carries the cross-vertical fields", () => {
+    const r = vehicleDataSchema.parse(validVehicle) as Record<string, unknown>;
+    expect(r).not.toHaveProperty("price");
+    expect(r).not.toHaveProperty("condition");
+    expect(r).not.toHaveProperty("province");
+    expect(r).not.toHaveProperty("district");
   });
 
   it("rejects an out-of-range year", () => {
@@ -68,6 +67,10 @@ const validForm = {
   title: "Toyota Corolla 2020 automático full",
   description: "Único dueño, mantenimientos al día.",
   professional_photos: false,
+  price: "18500",
+  condition: "used",
+  province: "Panamá",
+  district: "Betania",
   terms_accepted: true,
   photos: [{ url: "https://cdn.example.com/a.jpg", sort_order: 1 }],
   data: validVehicle,
@@ -76,6 +79,30 @@ const validForm = {
 describe("publishListingSchema", () => {
   it("parses a valid form", () => {
     expect(publishListingSchema.safeParse(validForm).success).toBe(true);
+  });
+
+  it("coerces the top-level price", () => {
+    expect(publishListingSchema.parse(validForm).price).toBe(18500);
+  });
+
+  it("rejects a non-positive price", () => {
+    expect(publishListingSchema.safeParse({ ...validForm, price: "0" }).success).toBe(false);
+    expect(publishListingSchema.safeParse({ ...validForm, price: "" }).success).toBe(false);
+  });
+
+  it("requires condition, province and district", () => {
+    for (const field of ["condition", "province", "district"] as const) {
+      const { [field]: _omit, ...rest } = validForm;
+      expect(publishListingSchema.safeParse(rest).success).toBe(false);
+    }
+    expect(publishListingSchema.safeParse({ ...validForm, province: "  " }).success).toBe(false);
+    expect(publishListingSchema.safeParse({ ...validForm, district: "" }).success).toBe(false);
+  });
+
+  it("rejects an invalid condition", () => {
+    expect(publishListingSchema.safeParse({ ...validForm, condition: "nuevo" }).success).toBe(
+      false,
+    );
   });
 
   it("requires model_text when 'Otro' is chosen", () => {

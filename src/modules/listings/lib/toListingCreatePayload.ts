@@ -18,11 +18,20 @@ export type VehicleCreatePayloadData = Omit<CarsData, "model_id" | "model_text">
  * Request body for POST /api/v1/listings. `user_id`/`business_id` come from the
  * JWT server-side and are not sent; `category` (inside `data`) maps to
  * `category_id` server-side.
+ *
+ * price/condition/province/district are top-level: they are the same for every
+ * vertical, so the API keeps them on the listing rather than inside `data`.
+ * `currency` ("USD") and `quantity` (1) are omitted on purpose — the backend
+ * defaults them; they only start mattering when parts land.
  */
 export interface ListingCreatePayload {
   title: string;
   description?: string;
   professional_photos: boolean;
+  price: number;
+  condition: PublishListingForm["condition"];
+  province: string;
+  district: string;
   photos: PhotoInputValue[];
   data: VehicleCreatePayloadData;
 }
@@ -35,6 +44,10 @@ export function toListingCreatePayload(form: PublishListingForm): ListingCreateP
     title: form.title,
     description: form.description,
     professional_photos: form.professional_photos,
+    price: form.price,
+    condition: form.condition,
+    province: form.province,
+    district: form.district,
     photos: form.photos,
     data: {
       ...d,
