@@ -5,12 +5,21 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import Link from "next/link";
 
 import { tokens } from "@/theme/tokens";
 
+import type { ListingResponse } from "../../api/types";
 import { listingMessages } from "../../messages";
 
-export function SuccessStep({ onClose }: { onClose: () => void }) {
+interface SuccessStepProps {
+  onClose: () => void;
+  /** The listing the API actually created. Optional so the step stays renderable
+   * in isolation (tests, Storybook) without a server round trip. */
+  listing?: ListingResponse;
+}
+
+export function SuccessStep({ onClose, listing }: SuccessStepProps) {
   const s = listingMessages.success;
   return (
     <Stack
@@ -38,6 +47,16 @@ export function SuccessStep({ onClose }: { onClose: () => void }) {
       <Typography variant="body1" sx={{ color: "text.secondary", maxWidth: 420 }}>
         {s.subtitle}
       </Typography>
+      {listing ? (
+        <Button
+          component={Link}
+          href={`/listings/${listing.id}`}
+          variant="text"
+          sx={{ color: tokens.colors.roti.dark, fontWeight: 600 }}
+        >
+          {s.viewListing}
+        </Button>
+      ) : null}
       <Button
         variant="contained"
         onClick={onClose}

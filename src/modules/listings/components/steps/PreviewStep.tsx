@@ -1,5 +1,6 @@
 "use client";
 
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
@@ -28,7 +29,7 @@ import { usePublishWizard } from "../PublishWizardContext";
 const currency = new Intl.NumberFormat("es-PA", { style: "currency", currency: "USD" });
 
 export function PreviewStep() {
-  const { goBack, submit, submitting } = usePublishWizard();
+  const { goBack, submit, submitting, submitError } = usePublishWizard();
   const { formState } = useFormContext();
   // useWatch returns live values (input shape at runtime); typed as the output
   // shape here purely so the display fields are renderable (no `unknown`).
@@ -101,9 +102,14 @@ export function PreviewStep() {
               "&:hover": { bgcolor: tokens.colors.neutralDarker },
             }}
           >
-            {nav.publish}
+            {submitting ? nav.publishing : nav.publish}
           </Button>
         </Stack>
+        {submitError ? (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {submitError}
+          </Alert>
+        ) : null}
       </Box>
 
       <Box

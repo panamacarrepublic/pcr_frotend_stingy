@@ -77,6 +77,8 @@ interface WizardContextValue {
   isFirst: boolean;
   isLast: boolean;
   submitting: boolean;
+  /** Message from a failed publish attempt, surfaced on the preview step. */
+  submitError: string | null;
   /** Validate the current step's fields; advance only if they pass. */
   goNext: () => Promise<void>;
   goBack: () => void;
@@ -100,6 +102,8 @@ interface PublishWizardProviderProps {
   variant?: WizardVariant;
   onSubmit: (payload: ListingCreatePayload) => Promise<void> | void;
   onRequestClose?: () => void;
+  /** Publish failure to show on the preview step; owned by the host component. */
+  submitError?: string | null;
   children: ReactNode;
 }
 
@@ -107,6 +111,7 @@ export function PublishWizardProvider({
   variant = "particular",
   onSubmit,
   onRequestClose,
+  submitError = null,
   children,
 }: PublishWizardProviderProps) {
   const form = useForm<PublishListingForm>({
@@ -138,7 +143,13 @@ export function PublishWizardProvider({
   const submit = useMemo(
     () =>
       form.handleSubmit(async (data) => {
-        await onSubmit(toListingCreatePayload(data));
+        try {
+          await onSubmit(toListingCreatePayload(data));
+        } catch {
+          // The host owns failure display (it passes `submitError` back in).
+          // Swallowing here keeps `submit` safe to use directly as an onClick
+          // handler, which would otherwise leak an unhandled rejection.
+        }
       }),
     [form, onSubmit],
   );
@@ -150,6 +161,7 @@ export function PublishWizardProvider({
     isFirst: state.index === 0,
     isLast: state.index === totalSteps - 1,
     submitting: form.formState.isSubmitting,
+    submitError,
     goNext,
     goBack,
     gotoStep,

@@ -15,6 +15,7 @@ export const listingMessages = {
     back: "Atrás",
     next: "Siguiente",
     publish: "Publicar",
+    publishing: "Publicando…",
     saveDraft: "Guardar Borrador",
     draftSaved: "Borrador guardado",
     backToEdit: "Volver a Editar",
@@ -139,11 +140,25 @@ export const listingMessages = {
     photosMax: "Máximo 10 fotos",
     terms: "Debes aceptar los términos y condiciones",
     submit: "No se pudo publicar el anuncio. Inténtalo de nuevo.",
+    // Fallbacks for API failures. Domain errors already arrive from the backend
+    // in Spanish and are shown verbatim (see api/errors.ts) — these only cover
+    // the cases where the response carries no usable message.
+    api: {
+      badReference: "La marca o el modelo seleccionado ya no está disponible.",
+      unauthorized: "Tu sesión expiró. Inicia sesión de nuevo.",
+      forbidden: "No tienes permiso para realizar esta acción.",
+      notFound: "El anuncio no existe o ya no está disponible.",
+      conflict: "No se pudo completar la acción por un conflicto con el anuncio.",
+      validation: "Revisa los datos del anuncio",
+      server: "Hubo un problema en el servidor. Inténtalo más tarde.",
+      network: "No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.",
+    },
   },
   success: {
     title: "¡Anuncio publicado!",
     subtitle: "Tu anuncio fue enviado correctamente.",
     cta: "Ver mis anuncios",
     another: "Publicar otro",
+    viewListing: "Ver el anuncio publicado",
   },
 } as const;

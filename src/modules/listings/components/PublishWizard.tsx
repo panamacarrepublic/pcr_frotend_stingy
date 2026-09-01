@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import { useCreateListing } from "@/hooks/useCreateListing";
 
+import { getListingErrorMessage } from "../api/errors";
+import type { ListingResponse } from "../api/types";
 import type { ListingCreatePayload } from "../lib/toListingCreatePayload";
 import {
   PublishWizardProvider,
@@ -47,23 +49,32 @@ interface PublishWizardProps {
 }
 
 export function PublishWizard({ onClose, variant = "particular" }: PublishWizardProps) {
-  const [done, setDone] = useState(false);
+  const [published, setPublished] = useState<ListingResponse | null>(null);
   const [method, setMethod] = useState<UploadMethod | null>(null);
   const createListing = useCreateListing();
 
   const handleSubmit = async (payload: ListingCreatePayload) => {
-    await createListing.mutateAsync(payload);
-    setDone(true);
+    // mutateAsync rejects on failure; swallowing it here would advance the
+    // wizard to the success screen on a listing that was never created.
+    const listing = await createListing.mutateAsync(payload);
+    setPublished(listing);
   };
 
-  if (done) return <SuccessStep onClose={onClose} />;
+  if (published) return <SuccessStep onClose={onClose} listing={published} />;
 
   if (variant === "business" && method === null) {
     return <MethodSelectStep onNext={(m) => setMethod(m)} onClose={onClose} />;
   }
 
   return (
-    <PublishWizardProvider variant={variant} onSubmit={handleSubmit} onRequestClose={onClose}>
+    <PublishWizardProvider
+      variant={variant}
+      onSubmit={handleSubmit}
+      onRequestClose={onClose}
+      submitError={
+        createListing.error ? getListingErrorMessage(createListing.error) : null
+      }
+    >
       <WizardBody />
     </PublishWizardProvider>
   );
