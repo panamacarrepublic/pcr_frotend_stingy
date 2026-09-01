@@ -154,6 +154,29 @@ export const listingMessages = {
       network: "No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.",
     },
   },
+  // Full edit modal, reached from "Editar Completo" on the inventory panel. The
+  // tab split is the one documented in the Figma handover notes (node
+  // 10699:4078): "Modal con tabs: Informacion, Fotos, Detalles del Producto".
+  edit: {
+    title: "Editar Anuncio",
+    close: "Cerrar",
+    tabs: {
+      info: "Información",
+      photos: "Fotos",
+      details: "Detalles del Producto",
+    },
+    save: "Guardar cambios",
+    saving: "Guardando…",
+    cancel: "Cancelar",
+    // A PATCH with no keys is a valid no-op, so there is nothing to report but
+    // also nothing to send — say so instead of faking a save.
+    noChanges: "No hiciste ningún cambio.",
+    loading: "Cargando el anuncio…",
+    loadError: "No pudimos cargar el anuncio.",
+    retry: "Reintentar",
+    photosReplaceHint:
+      "Al guardar, la galería queda exactamente como la ves aquí: las fotos que quites se eliminan del anuncio.",
+  },
   success: {
     title: "¡Anuncio publicado!",
     subtitle: "Tu anuncio fue enviado correctamente.",

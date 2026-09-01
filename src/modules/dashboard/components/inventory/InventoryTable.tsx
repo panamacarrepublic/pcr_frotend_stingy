@@ -13,45 +13,14 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 
-import { listingPrice, type ListingSummary } from "@/modules/listings/api/types";
+import { type ListingSummary } from "@/modules/listings/api/types";
 import { tokens } from "@/theme/tokens";
 
 import { CategoryBadge } from "./CategoryBadge";
+import { formatDate, formatPrice, shortId } from "./format";
 import { inventoryMessages } from "./messages";
 
 const m = inventoryMessages;
-
-const priceFormat = new Intl.NumberFormat("es-PA", {
-  style: "currency",
-  currency: "USD",
-});
-
-/** Figma shows MM/DD/YYYY. `created_at` is ISO 8601 with an offset. */
-const dateFormat = new Intl.DateTimeFormat("en-US", {
-  month: "2-digit",
-  day: "2-digit",
-  year: "numeric",
-});
-
-function formatDate(iso: string): string {
-  const date = new Date(iso);
-  return Number.isNaN(date.getTime()) ? "—" : dateFormat.format(date);
-}
-
-function formatPrice(listing: ListingSummary): string {
-  const value = listingPrice(listing);
-  // price is a decimal-as-string over the wire; a malformed one shouldn't render "NaN".
-  return Number.isFinite(value) ? priceFormat.format(value) : "—";
-}
-
-/**
- * The design's "ID de Producto" column shows a `PRD-2024-007629` style code.
- * No such field exists on the API — `ListingSummary` carries only a UUID — so
- * we surface a readable prefix of the real id rather than invent a code.
- */
-function shortId(id: string): string {
-  return id.replace(/-/g, "").slice(0, 8);
-}
 
 const cellSx = { borderBottom: `1px solid ${tokens.colors.foreground}`, py: 1.5 };
 
@@ -81,9 +50,19 @@ interface Props {
   selectedIds: string[];
   onToggleRow: (id: string) => void;
   onToggleAll: () => void;
+  /** Row click or the gear button — opens the "Detalles del Anuncio" panel. */
+  onOpenDetails: (listing: ListingSummary) => void;
+  onDelete: (listing: ListingSummary) => void;
 }
 
-export function InventoryTable({ items, selectedIds, onToggleRow, onToggleAll }: Props) {
+export function InventoryTable({
+  items,
+  selectedIds,
+  onToggleRow,
+  onToggleAll,
+  onOpenDetails,
+  onDelete,
+}: Props) {
   const allSelected = items.length > 0 && selectedIds.length === items.length;
   const someSelected = selectedIds.length > 0 && !allSelected;
 
@@ -117,13 +96,16 @@ export function InventoryTable({ items, selectedIds, onToggleRow, onToggleAll }:
             <TableRow
               key={listing.id}
               selected={isSelected}
+              onClick={() => onOpenDetails(listing)}
               sx={{
                 cursor: "pointer",
                 "&:hover": { bgcolor: tokens.colors.foreground },
                 "&.Mui-selected, &.Mui-selected:hover": { bgcolor: tokens.colors.azul.lightest },
               }}
             >
-              <TableCell padding="checkbox" sx={cellSx}>
+              {/* Selecting rows for a bulk action is not "open this listing", so
+                  the checkbox cell keeps its click to itself. */}
+              <TableCell padding="checkbox" sx={cellSx} onClick={(e) => e.stopPropagation()}>
                 <Checkbox
                   checked={isSelected}
                   onChange={() => onToggleRow(listing.id)}
@@ -160,30 +142,29 @@ export function InventoryTable({ items, selectedIds, onToggleRow, onToggleAll }:
               </TableCell>
 
               <TableCell sx={{ ...cellSx, textAlign: "right" }}>
-                <Typography variant="body2">{formatPrice(listing)}</Typography>
+                <Typography variant="body2">{formatPrice(listing.price)}</Typography>
               </TableCell>
 
-              <TableCell sx={{ ...cellSx, width: 96 }}>
+              {/* Both buttons sit inside the clickable row, so they stop the
+                  event rather than opening the panel on their way to acting. */}
+              <TableCell sx={{ ...cellSx, width: 96 }} onClick={(e) => e.stopPropagation()}>
                 <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-                  {/* Both actions are intentionally inert for now — edit and
-                      delete flows land with the listing detail work. */}
-                  <IconButton size="small" aria-label={m.rowActions.settings} disabled>
+                  <IconButton
+                    size="small"
+                    aria-label={m.rowActions.settings}
+                    onClick={() => onOpenDetails(listing)}
+                  >
                     <SettingsIcon fontSize="small" />
                   </IconButton>
                   <IconButton
                     size="small"
                     aria-label={m.rowActions.delete}
-                    disabled
+                    onClick={() => onDelete(listing)}
                     sx={{
                       borderRadius: `${tokens.radius.sm}px`,
                       bgcolor: tokens.colors.naranja.main,
                       color: tokens.colors.white,
                       "&:hover": { bgcolor: tokens.colors.naranja.darkest },
-                      "&.Mui-disabled": {
-                        bgcolor: tokens.colors.naranja.main,
-                        color: tokens.colors.white,
-                        opacity: 0.55,
-                      },
                     }}
                   >
                     <DeleteOutlineIcon fontSize="small" />
