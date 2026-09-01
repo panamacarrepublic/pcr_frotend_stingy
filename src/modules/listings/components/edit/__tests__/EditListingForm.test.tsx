@@ -66,14 +66,14 @@ beforeEach(() => {
 const renderForm = (props: Partial<Parameters<typeof EditListingForm>[0]> = {}) =>
   render(<EditListingForm listing={listing()} onClose={noop} {...props} />);
 
-const save = () => fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+const save = () => fireEvent.click(screen.getByRole("button", { name: "Guardar Cambios" }));
 const goToTab = (name: string) => fireEvent.click(screen.getByRole("tab", { name }));
 
 test("opens on Información with the listing's values already in the fields", () => {
   renderForm();
 
-  expect(screen.getByLabelText("Título del anuncio")).toHaveValue("Toyota Hilux 2020 doble cabina");
-  expect(screen.getByLabelText("Precio")).toHaveValue("18500.00");
+  expect(screen.getByLabelText(/^Título del anuncio/)).toHaveValue("Toyota Hilux 2020 doble cabina");
+  expect(screen.getByLabelText(/^Precio/)).toHaveValue("18500.00");
   expect(screen.getByLabelText("Descripción")).toHaveValue("Único dueño.");
 });
 
@@ -102,7 +102,7 @@ test("saving an edited title sends only that field", async () => {
   const onClose = jest.fn();
   renderForm({ onClose });
 
-  fireEvent.change(screen.getByLabelText("Título del anuncio"), {
+  fireEvent.change(screen.getByLabelText(/^Título del anuncio/), {
     target: { value: "Toyota Hilux 2020 4x4 full extras" },
   });
   save();
@@ -120,7 +120,7 @@ test("saving an edited title sends only that field", async () => {
 test("an unrelated edit leaves the gallery out of the patch", async () => {
   renderForm();
 
-  fireEvent.change(screen.getByLabelText("Título del anuncio"), {
+  fireEvent.change(screen.getByLabelText(/^Título del anuncio/), {
     target: { value: "Toyota Hilux 2020 4x4 full extras" },
   });
   save();
@@ -167,7 +167,7 @@ test("a rejected save shows the backend's reason and keeps the form open", async
   mockUseUpdateListing.mockReturnValue({ mutateAsync, isPending: false, error: conflict });
 
   renderForm({ onClose });
-  fireEvent.change(screen.getByLabelText("Título del anuncio"), {
+  fireEvent.change(screen.getByLabelText(/^Título del anuncio/), {
     target: { value: "Toyota Hilux 2020 4x4 full extras" },
   });
   save();
@@ -188,4 +188,67 @@ test("the photos tab warns that saving replaces the whole gallery", () => {
   goToTab("Fotos");
 
   expect(screen.getByText(/las fotos que quites se eliminan/i)).toBeInTheDocument();
+});
+
+describe("the identity header", () => {
+  test("names the listing being edited, with its cover photo", () => {
+    renderForm();
+
+    expect(screen.getByText("Toyota Hilux 2020 doble cabina")).toBeInTheDocument();
+    expect(screen.getByAltText("Toyota Hilux 2020 doble cabina")).toBeInTheDocument();
+  });
+
+  // The design shows the publish date relatively here, unlike the table.
+  test("shows how long ago the listing was published", () => {
+    renderForm();
+    expect(screen.getByText(/Publicado hace/)).toBeInTheDocument();
+  });
+});
+
+describe("the pending-changes banner", () => {
+  test("stays hidden while nothing has been edited", () => {
+    renderForm();
+    expect(screen.queryByText(/cambio.? pendiente/i)).not.toBeInTheDocument();
+  });
+
+  test("counts the edits as they happen", () => {
+    renderForm();
+
+    fireEvent.change(screen.getByLabelText(/^Título del anuncio/), {
+      target: { value: "Toyota Hilux 2020 4x4 full extras" },
+    });
+    fireEvent.change(screen.getByLabelText(/^Precio/), { target: { value: "19000" } });
+
+    expect(screen.getByText(/2 cambios pendientes/i)).toBeInTheDocument();
+  });
+
+  test("uses the singular for a single edit", () => {
+    renderForm();
+
+    fireEvent.change(screen.getByLabelText(/^Título del anuncio/), {
+      target: { value: "Toyota Hilux 2020 4x4 full extras" },
+    });
+
+    expect(screen.getByText(/1 cambio pendiente/i)).toBeInTheDocument();
+  });
+});
+
+// The design's counter reads "/100", but the API contract is 5..150 characters.
+// The counter must track the real limit, not the mock's.
+test("the title counter tracks the schema's real maximum", () => {
+  renderForm();
+  expect(screen.getByText("30/150 caracteres")).toBeInTheDocument();
+});
+
+test("Vista Previa opens the public page in a new tab", () => {
+  renderForm();
+
+  const preview = screen.getByRole("link", { name: "Vista Previa" });
+  expect(preview).toHaveAttribute("href", "/listings/listing-1");
+  expect(preview).toHaveAttribute("target", "_blank");
+});
+
+test("the required fields are marked as such", () => {
+  renderForm();
+  expect(screen.getByLabelText("Título del anuncio*")).toBeInTheDocument();
 });

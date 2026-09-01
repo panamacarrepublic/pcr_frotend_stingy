@@ -9,6 +9,8 @@ interface FieldShellProps {
   /** Renders the small (i) icon next to the label; string becomes its tooltip. */
   info?: string | boolean;
   error?: string;
+  /** Appends the design's `*` marker to the label. */
+  required?: boolean;
   htmlFor?: string;
   children: ReactNode;
 }
@@ -18,7 +20,7 @@ interface FieldShellProps {
  * control, and error text below. Matches the Figma "label on top" field layout
  * — we do NOT use MUI's floating label.
  */
-export function FieldShell({ label, info, error, htmlFor, children }: FieldShellProps) {
+export function FieldShell({ label, info, error, required, htmlFor, children }: FieldShellProps) {
   const infoIcon = info ? (
     <Tooltip title={typeof info === "string" ? info : ""} arrow disableHoverListener={info === true}>
       <InfoOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
@@ -36,7 +38,7 @@ export function FieldShell({ label, info, error, htmlFor, children }: FieldShell
           htmlFor={htmlFor}
         >
           <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
-            {label}
+            {required ? `${label}*` : label}
           </Typography>
           {infoIcon}
         </Stack>

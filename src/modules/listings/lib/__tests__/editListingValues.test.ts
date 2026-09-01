@@ -1,7 +1,11 @@
 import type { ListingResponse } from "../../api/types";
 import { editListingSchema } from "../../schemas/editListing.schema";
 import { OTHER_MODEL } from "../../schemas/vehicle.schema";
-import { toEditListingValues, toListingUpdatePayload } from "../editListingValues";
+import {
+  countPendingChanges,
+  toEditListingValues,
+  toListingUpdatePayload,
+} from "../editListingValues";
 
 const MAKE_ID = "11111111-1111-1111-1111-111111111111";
 const MODEL_ID = "22222222-2222-2222-2222-222222222222";
@@ -264,5 +268,32 @@ describe("toListingUpdatePayload", () => {
     ["category", "currency", "status", "quantity", "id"].forEach((key) => {
       expect(patch).not.toHaveProperty(key);
     });
+  });
+});
+
+describe("countPendingChanges", () => {
+  it("is zero for an untouched form", () => {
+    expect(countPendingChanges({})).toBe(0);
+  });
+
+  it("counts each top-level field", () => {
+    expect(countPendingChanges({ title: "x", price: 1 })).toBe(2);
+  });
+
+  // `data` is one key on the wire but several edits to the seller, and the
+  // banner speaks the seller's language.
+  it("counts the vehicle fields individually, not the data wrapper", () => {
+    expect(countPendingChanges({ title: "x", data: { mileage: 1, year: 2020 } })).toBe(3);
+  });
+
+  it("counts the whole gallery as a single change", () => {
+    expect(
+      countPendingChanges({
+        photos: [
+          { url: "a", sort_order: 1 },
+          { url: "b", sort_order: 2 },
+        ],
+      }),
+    ).toBe(1);
   });
 });

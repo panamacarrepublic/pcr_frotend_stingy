@@ -155,3 +155,20 @@ export function toListingUpdatePayload(
 
   return patch;
 }
+
+/**
+ * How many edits the patch represents, for the "tienes N cambios pendientes"
+ * banner.
+ *
+ * `data` is a single key on the wire but several distinct edits from the
+ * seller's point of view, so it is expanded; `photos` is the opposite — a whole
+ * gallery replacement reads as one change, not one per photo.
+ */
+export function countPendingChanges(patch: ListingUpdate): number {
+  return Object.entries(patch).reduce((total, [key, value]) => {
+    if (key === "data" && value && typeof value === "object") {
+      return total + Object.keys(value).length;
+    }
+    return total + 1;
+  }, 0);
+}

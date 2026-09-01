@@ -7,23 +7,57 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import { useState } from "react";
-import { FormProvider, useForm, type DefaultValues } from "react-hook-form";
+import Link from "next/link";
+import { useRef, useState } from "react";
+import { FormProvider, useForm, useWatch, type DefaultValues } from "react-hook-form";
 
 import { useUpdateListing } from "@/hooks/useUpdateListing";
+import { tokens } from "@/theme/tokens";
 
 import { getListingErrorMessage } from "../../api/errors";
 import type { ListingResponse } from "../../api/types";
+import {
+  countPendingChanges,
+  toEditListingValues,
+  toListingUpdatePayload,
+} from "../../lib/editListingValues";
 import { editTabs, firstTabWithError, type EditTabId } from "../../lib/editTabs";
-import { toEditListingValues, toListingUpdatePayload } from "../../lib/editListingValues";
 import { listingMessages } from "../../messages";
-import { editListingSchema, type EditListingForm as EditFormValues } from "../../schemas/editListing.schema";
+import {
+  editListingSchema,
+  type EditListingForm as EditFormValues,
+} from "../../schemas/editListing.schema";
 import { listingErrorMap } from "../../schemas/errorMap";
+import { EditListingHeader } from "./EditListingHeader";
 import { DetailsTab } from "./tabs/DetailsTab";
 import { InfoTab } from "./tabs/InfoTab";
 import { PhotosTab } from "./tabs/PhotosTab";
 
 const m = listingMessages.edit;
+
+/** Segmented control, not MUI's underlined tabs: a white pill on a grey track. */
+const segmentedSx = {
+  minHeight: 0,
+  bgcolor: tokens.colors.foreground,
+  borderRadius: `${tokens.radius.md}px`,
+  p: 0.5,
+  "& .MuiTabs-indicator": { display: "none" },
+  "& .MuiTabs-flexContainer": { gap: 0.5 },
+  "& .MuiTab-root": {
+    flex: 1,
+    minHeight: 0,
+    py: 1.25,
+    borderRadius: `${tokens.radius.sm}px`,
+    textTransform: "none",
+    color: "text.secondary",
+  },
+  "& .MuiTab-root.Mui-selected": {
+    bgcolor: tokens.colors.white,
+    color: "text.primary",
+    fontWeight: 600,
+    boxShadow: tokens.shadows.card,
+  },
+} as const;
 
 function TabBody({ id }: { id: EditTabId }) {
   switch (id) {
@@ -64,9 +98,20 @@ export function EditListingForm({ listing, onClose }: Props) {
     mode: "onTouched",
   });
 
+  // Live count for the "cambios pendientes" banner. Mid-edit the form often
+  // fails to parse (an emptied number, a half-typed year); rather than blink to
+  // zero, the banner holds the last count it could actually compute.
+  const values = useWatch({ control: form.control });
+  const lastCount = useRef(0);
+  const parsed = editListingSchema.safeParse(values);
+  if (parsed.success) {
+    lastCount.current = countPendingChanges(toListingUpdatePayload(parsed.data, listing));
+  }
+  const pending = lastCount.current;
+
   const submit = form.handleSubmit(
-    async (values) => {
-      const patch = toListingUpdatePayload(values, listing);
+    async (data) => {
+      const patch = toListingUpdatePayload(data, listing);
       // An empty patch is a valid no-op server-side, so sending it would be a
       // round trip that changes nothing.
       if (Object.keys(patch).length === 0) {
@@ -93,13 +138,63 @@ export function EditListingForm({ listing, onClose }: Props) {
 
   return (
     <FormProvider {...form}>
-      <Stack spacing={3}>
-        <Tabs
-          value={tab}
-          onChange={(_, next: EditTabId) => setTab(next)}
-          variant="scrollable"
-          scrollButtons="auto"
-        >
+      <Stack spacing={2.5}>
+        <EditListingHeader listing={listing} />
+
+        {pending > 0 ? (
+          <Alert severity="info">
+            {pending === 1 ? m.pendingOne : m.pendingMany.replace("{n}", String(pending))}
+            <Box component="span" sx={{ display: "block", color: "text.secondary" }}>
+              {m.pendingHint}
+            </Box>
+          </Alert>
+        ) : null}
+
+        {noChanges ? <Alert severity="info">{m.noChanges}</Alert> : null}
+        {update.error ? <Alert severity="error">{getListingErrorMessage(update.error)}</Alert> : null}
+
+        {/* Above the tabs, per the design: the actions apply to the whole
+            listing, not to whichever tab happens to be open. */}
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+          <Button
+            onClick={onClose}
+            disabled={update.isPending}
+            sx={{
+              bgcolor: tokens.colors.naranja.lighter,
+              color: tokens.colors.naranja.darkest,
+              "&:hover": { bgcolor: tokens.colors.naranja.lighter },
+            }}
+          >
+            {m.cancel}
+          </Button>
+          <Button
+            component={Link}
+            href={`/listings/${listing.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{
+              bgcolor: tokens.colors.azul.lightest,
+              color: tokens.colors.neutralDarkest,
+              "&:hover": { bgcolor: tokens.colors.azul.lighter },
+            }}
+          >
+            {m.preview}
+          </Button>
+          <Button
+            onClick={submit}
+            disabled={update.isPending}
+            sx={{
+              flex: 1,
+              bgcolor: tokens.colors.neutralDarkest,
+              color: tokens.colors.white,
+              "&:hover": { bgcolor: tokens.colors.neutralDarker },
+            }}
+          >
+            {update.isPending ? m.saving : m.save}
+          </Button>
+        </Stack>
+
+        <Tabs value={tab} onChange={(_, next: EditTabId) => setTab(next)} sx={segmentedSx}>
           {editTabs.map((meta) => (
             <Tab key={meta.id} value={meta.id} label={meta.label} />
           ))}
@@ -110,18 +205,6 @@ export function EditListingForm({ listing, onClose }: Props) {
         <Box>
           <TabBody id={tab} />
         </Box>
-
-        {noChanges ? <Alert severity="info">{m.noChanges}</Alert> : null}
-        {update.error ? <Alert severity="error">{getListingErrorMessage(update.error)}</Alert> : null}
-
-        <Stack direction="row" spacing={1.5} justifyContent="flex-end">
-          <Button onClick={onClose} disabled={update.isPending}>
-            {m.cancel}
-          </Button>
-          <Button variant="contained" onClick={submit} disabled={update.isPending}>
-            {update.isPending ? m.saving : m.save}
-          </Button>
-        </Stack>
       </Stack>
     </FormProvider>
   );

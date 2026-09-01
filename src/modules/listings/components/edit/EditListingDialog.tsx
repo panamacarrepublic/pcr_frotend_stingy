@@ -42,7 +42,7 @@ export function EditListingDialog({ listingId, open, onClose }: Props) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth scroll="body">
       <DialogTitle sx={{ pr: 7 }}>
-        <Typography variant="h4" component="span" sx={{ textTransform: "uppercase" }}>
+        <Typography variant="h3" component="span" sx={{ textTransform: "uppercase" }}>
           {m.title}
         </Typography>
         <IconButton
@@ -54,7 +54,7 @@ export function EditListingDialog({ listingId, open, onClose }: Props) {
         </IconButton>
       </DialogTitle>
 
-      <DialogContent dividers>
+      <DialogContent>
         {listing.isLoading ? (
           <Stack alignItems="center" spacing={2} sx={{ py: 6 }}>
             <CircularProgress sx={{ color: tokens.colors.roti.main }} />
