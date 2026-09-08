@@ -22,7 +22,28 @@ import { inventoryMessages } from "./messages";
 
 const m = inventoryMessages;
 
-const cellSx = { borderBottom: `1px solid ${tokens.colors.foreground}`, py: 1.5 };
+const cellSx = { borderBottom: `1px solid ${tokens.colors.cardBorder}`, py: 1.5 };
+
+/**
+ * The actions column floats above the row content while the table scrolls
+ * sideways (Figma node 11010:15293) — on a phone the other five columns are
+ * wider than the viewport, and edit/delete must stay reachable without
+ * scrolling back.
+ *
+ * The design fills it with white at 60%; the blur keeps the text underneath from
+ * reading through it mid-scroll.
+ */
+const actionCellSx = {
+  ...cellSx,
+  position: "sticky",
+  right: 0,
+  zIndex: 2,
+  width: 116,
+  bgcolor: tokens.colors.whiteAlpha[60],
+  backdropFilter: "blur(6px)",
+  borderLeft: `1px solid ${tokens.colors.cardBorder}`,
+  boxShadow: tokens.shadows.overlay,
+} as const;
 
 /** Column header with the design's sort arrow. */
 function HeaderCell({ label, align }: { label: string; align?: "right" }) {
@@ -67,7 +88,7 @@ export function InventoryTable({
   const someSelected = selectedIds.length > 0 && !allSelected;
 
   return (
-    <Table sx={{ minWidth: 760 }}>
+    <Table sx={{ minWidth: 760, borderCollapse: "separate", borderSpacing: 0 }}>
       <TableHead>
         <TableRow>
           <TableCell padding="checkbox" sx={cellSx}>
@@ -84,8 +105,9 @@ export function InventoryTable({
           <HeaderCell label={m.columns.name} />
           <HeaderCell label={m.columns.category} />
           <HeaderCell label={m.columns.price} align="right" />
-          {/* Actions column: unlabelled in the design. */}
-          <TableCell sx={cellSx} />
+          {/* Actions column: unlabelled in the design, but it still has to be
+              sticky or it would scroll out from under the body cells. */}
+          <TableCell sx={actionCellSx} />
         </TableRow>
       </TableHead>
 
@@ -147,27 +169,28 @@ export function InventoryTable({
 
               {/* Both buttons sit inside the clickable row, so they stop the
                   event rather than opening the panel on their way to acting. */}
-              <TableCell sx={{ ...cellSx, width: 96 }} onClick={(e) => e.stopPropagation()}>
+              <TableCell sx={actionCellSx} onClick={(e) => e.stopPropagation()}>
                 <Stack direction="row" spacing={0.5} justifyContent="flex-end">
                   <IconButton
-                    size="small"
                     aria-label={m.rowActions.settings}
                     onClick={() => onOpenDetails(listing)}
+                    sx={{ width: 44, height: 44, borderRadius: `${tokens.radius.md}px` }}
                   >
-                    <SettingsIcon fontSize="small" />
+                    <SettingsIcon />
                   </IconButton>
                   <IconButton
-                    size="small"
                     aria-label={m.rowActions.delete}
                     onClick={() => onDelete(listing)}
                     sx={{
-                      borderRadius: `${tokens.radius.sm}px`,
-                      bgcolor: tokens.colors.naranja.main,
+                      width: 40,
+                      height: 40,
+                      borderRadius: `${tokens.radius.md}px`,
+                      bgcolor: tokens.colors.rojoIntenso,
                       color: tokens.colors.white,
                       "&:hover": { bgcolor: tokens.colors.naranja.darkest },
                     }}
                   >
-                    <DeleteOutlineIcon fontSize="small" />
+                    <DeleteOutlineIcon />
                   </IconButton>
                 </Stack>
               </TableCell>

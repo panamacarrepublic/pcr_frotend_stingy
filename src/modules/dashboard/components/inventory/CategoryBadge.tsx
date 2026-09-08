@@ -33,13 +33,16 @@ export function CategoryBadge({ status }: { status: ListingStatus }) {
         display: "inline-flex",
         alignItems: "center",
         gap: 0.75,
-        px: 1,
-        py: 0.25,
-        borderRadius: `${tokens.radius.sm}px`,
-        border: `1px solid ${tokens.colors.border}`,
-        bgcolor: tokens.colors.white,
-        color: "text.primary",
-        fontSize: "0.75rem",
+        // Figma "Tag" (node 11010:15249): cream fill, neutral hairline and
+        // label, pill padding 10/4, radius 8.
+        px: 1.25,
+        py: 0.5,
+        borderRadius: `${tokens.radius.md}px`,
+        border: `1px solid ${tokens.colors.neutral}`,
+        bgcolor: tokens.colors.foreground,
+        color: tokens.colors.neutral,
+        fontWeight: 600,
+        fontSize: "0.875rem",
         lineHeight: 1.5,
         whiteSpace: "nowrap",
       }}

@@ -42,11 +42,13 @@ export function InventoryPagination({
   onGoToPage,
 }: Props) {
   return (
+    // Figma node 11010:15326 stacks the footer on mobile — the two labelled
+    // buttons plus the page numbers do not fit a 375px row.
     <Stack
-      direction="row"
+      direction={{ xs: "column", md: "row" }}
       alignItems="center"
       justifyContent="space-between"
-      sx={{ px: 2, py: 1.5, gap: 2 }}
+      sx={{ px: 2, py: 1.5, gap: { xs: 1.5, md: 2 } }}
     >
       <Button
         onClick={onPrevious}
@@ -54,6 +56,7 @@ export function InventoryPagination({
         startIcon={<ChevronLeftIcon />}
         sx={{
           minWidth: 104,
+          width: { xs: "100%", md: "auto" },
           color: "text.primary",
           bgcolor: tokens.colors.foreground,
           borderRadius: `${tokens.radius.sm}px`,
@@ -103,6 +106,7 @@ export function InventoryPagination({
         endIcon={<ChevronRightIcon />}
         sx={{
           minWidth: 104,
+          width: { xs: "100%", md: "auto" },
           color: "text.primary",
           bgcolor: tokens.colors.foreground,
           borderRadius: `${tokens.radius.sm}px`,

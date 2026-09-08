@@ -13,14 +13,21 @@ import { useDashboardScheme } from "@/components/layout/dashboard/DashboardSchem
 interface Props {
   item: NavItem;
   active: boolean;
+  /** Fires on click so a drawer host can close itself after navigation. */
+  onNavigate?: () => void;
 }
 
-export function SidebarNavLink({ item, active }: Props) {
+export function SidebarNavLink({ item, active, onNavigate }: Props) {
   const scheme = useDashboardScheme();
   const Icon = NAV_ICONS[item.icon];
 
   return (
-    <Box component={Link} href={item.href} sx={{ textDecoration: "none", display: "block" }}>
+    <Box
+      component={Link}
+      href={item.href}
+      onClick={onNavigate}
+      sx={{ textDecoration: "none", display: "block" }}
+    >
       <Stack
         direction="row"
         alignItems="center"

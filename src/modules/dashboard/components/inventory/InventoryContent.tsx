@@ -27,7 +27,8 @@ function TableCard({ children }: { children: React.ReactNode }) {
   return (
     <Box
       sx={{
-        bgcolor: tokens.colors.white,
+        // Figma "Table container" (node 11010:15124) — cream, not white.
+        bgcolor: tokens.colors.roti.lightest,
         border: `1px solid ${tokens.colors.cardBorder}`,
         borderRadius: `${tokens.radius.md}px`,
         overflow: "hidden",

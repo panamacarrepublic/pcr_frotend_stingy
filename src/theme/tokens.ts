@@ -27,6 +27,9 @@ export const tokens = {
     naranja: { main: "#e15c2b", lighter: "#ffd9c7", darkest: "#4d1c0a" },
     azul: { main: "#3a86ff", lighter: "#a3c7ff", lightest: "#ecf3ff", darkest: "#132e66" },
     verde: { main: "#06893c", lightest: "#e6f7ec" },
+    // Figma "Color/Rojo Intenso" — the destructive row action on the inventory
+    // table (node 11010:15297). Distinct from `naranja`, which is a brand accent.
+    rojoIntenso: "#eb3333",
     // Figma variable "Color/Amarillo Vibrante Light" — the primary action fill
     // on the listing detail panel (node 10694:4070, "Editar Completo").
     amarilloVibrante: { light: "#ffd666" },
@@ -38,7 +41,7 @@ export const tokens = {
     // White overlays for tinted (dark/gold) sidebars — Figma "Opacity/White".
     whiteAlpha: { 10: "#ffffff1a", 20: "#ffffff33", 30: "#ffffff4d", 60: "#ffffff99" },
     // Neutral-Darkest overlays — Figma "Opacity/Neutral Darkest".
-    darkestAlpha: { 15: "#06060726", 40: "#06060766", 60: "#06060799" },
+    darkestAlpha: { 5: "#0606070d", 15: "#06060726", 40: "#06060766", 60: "#06060799" },
   },
   typography: {
     // Refine fontFamily from Figma Typography frame in Step 1.
@@ -82,6 +85,9 @@ export const tokens = {
   shadows: {
     card: "0 1px 3px rgba(6, 6, 7, 0.08)",
     raised: "0 4px 12px rgba(6, 6, 7, 0.12)",
+    // Figma effect "medium" — lifts the sticky actions column above the row
+    // content it scrolls over.
+    overlay: "0 12px 16px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.03)",
   },
   breakpoints: {
     xs: 0,
