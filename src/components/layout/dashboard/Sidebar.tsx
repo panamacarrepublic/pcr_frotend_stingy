@@ -20,9 +20,11 @@ interface Props {
   bottomNavItems: NavItem[];
   profile: DashboardProfile;
   activeKey: string;
+  /** Passed down to every link; the mobile drawer uses it to close itself. */
+  onNavigate?: () => void;
 }
 
-export function Sidebar({ navItems, bottomNavItems, profile, activeKey }: Props) {
+export function Sidebar({ navItems, bottomNavItems, profile, activeKey, onNavigate }: Props) {
   const scheme = useDashboardScheme();
   const initials = profile.name
     .split(" ")
@@ -35,7 +37,7 @@ export function Sidebar({ navItems, bottomNavItems, profile, activeKey }: Props)
     <Stack
       component="nav"
       sx={{
-        width: 312,
+        width: "100%",
         height: "100%",
         bgcolor: scheme.sidebarBg,
         borderRight: `1px solid ${scheme.sidebarBorder}`,
@@ -106,7 +108,7 @@ export function Sidebar({ navItems, bottomNavItems, profile, activeKey }: Props)
       <Stack component="ul" sx={{ listStyle: "none", m: 0, px: 1.5, pb: 1, gap: 0.25 }}>
         {navItems.map((item) => (
           <Box component="li" key={item.key}>
-            <SidebarNavLink item={item} active={item.key === activeKey} />
+            <SidebarNavLink item={item} active={item.key === activeKey} onNavigate={onNavigate} />
           </Box>
         ))}
       </Stack>
@@ -117,7 +119,7 @@ export function Sidebar({ navItems, bottomNavItems, profile, activeKey }: Props)
       <Stack component="ul" sx={{ listStyle: "none", m: 0, px: 1.5, py: 1, gap: 0.25 }}>
         {bottomNavItems.map((item) => (
           <Box component="li" key={item.key}>
-            <SidebarNavLink item={item} active={item.key === activeKey} />
+            <SidebarNavLink item={item} active={item.key === activeKey} onNavigate={onNavigate} />
           </Box>
         ))}
       </Stack>
