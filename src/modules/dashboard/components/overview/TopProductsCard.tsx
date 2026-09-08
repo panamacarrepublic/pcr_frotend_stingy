@@ -33,13 +33,23 @@ export function TopProductsCard({ products }: { products: TopProduct[] }) {
                 borderRadius: 1.5,
                 p: 1.25,
                 display: "flex",
-                gap: 2.5,
+                // Image beside text needs ~270px; below that they stack.
+                flexDirection: { xs: "column", sm: "row" },
+                gap: { xs: 1.5, sm: 2.5 },
                 flex: "1 0 0",
                 minWidth: 0,
               }}
             >
               {/* Image */}
-              <Box sx={{ flex: "1 0 0", minWidth: 0, position: "relative", minHeight: 80 }}>
+              <Box
+                sx={{
+                  flex: { xs: "0 0 auto", sm: "1 0 0" },
+                  width: { xs: "100%", sm: "auto" },
+                  minWidth: 0,
+                  position: "relative",
+                  minHeight: { xs: 140, sm: 80 },
+                }}
+              >
                 {p.imageUrl ? (
                   <Image
                     src={p.imageUrl}
@@ -62,7 +72,7 @@ export function TopProductsCard({ products }: { products: TopProduct[] }) {
               </Box>
 
               {/* Content */}
-              <Stack spacing={1} sx={{ flexShrink: 0, width: 171 }}>
+              <Stack spacing={1} sx={{ flexShrink: 0, width: { xs: "100%", sm: 171 } }}>
                 <Tag label={p.category} tone={p.categoryTone} />
                 <Typography variant="caption" fontWeight={600} color="text.primary">
                   {p.title}

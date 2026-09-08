@@ -36,9 +36,9 @@ interface Props {
  * It owns the open/closed state, which is why it is the only client component in
  * the shell — `DashboardShell` itself stays a Server Component.
  *
- * The bar takes its colour from the role scheme rather than a fixed token, so it
- * always matches the page header sitting right below it; the design shows the
- * two as one continuous block.
+ * The bar has its own colour in the scheme rather than reusing `headerBg`: the
+ * design fills it with roti-dark (node 11000:36995), which is a shade darker
+ * than the business header card sitting below it.
  */
 export function DashboardMobileNav({ navItems, bottomNavItems, profile, activeKey }: Props) {
   const scheme = useDashboardScheme();
@@ -53,7 +53,7 @@ export function DashboardMobileNav({ navItems, bottomNavItems, profile, activeKe
         direction="row"
         alignItems="center"
         justifyContent="space-between"
-        sx={{ bgcolor: scheme.headerBg, py: "20px", pl: "20px", pr: "12px" }}
+        sx={{ bgcolor: scheme.mobileNavBg, py: "20px", pl: "20px", pr: "12px" }}
       >
         {/* Matches the Sidebar's own logo treatment — an inline SVG asset that
             next/image would only wrap without optimising. */}

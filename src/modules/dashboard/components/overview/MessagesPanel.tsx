@@ -72,14 +72,19 @@ export function MessagesPanel({
       </Typography>
 
       {/* Tabs */}
+      {/* Scrollable, not fixed: the three labels are wider than a 390px phone,
+          and MUI's default variant clips the overflow instead of revealing it. */}
       <Tabs
         value={tab}
         onChange={(_, v: TabKey) => setTab(v)}
+        variant="scrollable"
+        scrollButtons="auto"
+        allowScrollButtonsMobile
         sx={{
           minHeight: "unset",
           "& .MuiTab-root": {
             minHeight: 40,
-            px: 2,
+            px: { xs: 1.25, md: 2 },
             py: 1.25,
             fontSize: "1rem",
             textTransform: "none",
