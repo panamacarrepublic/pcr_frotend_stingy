@@ -36,4 +36,38 @@ export const inventoryMessages = {
   // Only the cars vertical exists in the API today, so every listing is a
   // vehicle. Parts / collectibles get their own labels when those land.
   categoryLabel: "Vehículos",
+  // "Detalles del Anuncio" panel — Figma node 10689:14128. Opened by the gear
+  // button or a row click; the gateway to the full edit modal.
+  quickView: {
+    title: "Detalles del Anuncio",
+    close: "Cerrar",
+    idPrefix: "ID:",
+    published: "Publicado",
+    description: "Descripción",
+    noDescription: "Este anuncio todavía no tiene descripción.",
+    viewPublic: "Ver Público",
+    editFull: "Editar Completo",
+    loading: "Cargando el anuncio…",
+    error: "No pudimos cargar este anuncio.",
+    // Shown instead of enabling the edit button. The API rejects every PATCH on
+    // these three states with a 409, so opening the form would waste the
+    // seller's time on a save that cannot succeed.
+    readOnly: {
+      sold: "Este anuncio está vendido y ya no puede editarse.",
+      expired: "Este anuncio expiró y ya no puede editarse.",
+      rejected: "Este anuncio fue rechazado y no puede editarse.",
+    },
+  },
+  deleteDialog: {
+    title: "¿Eliminar este anuncio?",
+    body: "Dejará de estar visible para los compradores y saldrá de tu inventario.",
+    // Known backend debt, worth surfacing before the seller confirms: the soft
+    // delete does not release the VIN, so the same vehicle cannot be relisted.
+    vinWarning:
+      "Ojo: el VIN no se libera, así que no podrás volver a publicar este mismo vehículo.",
+    confirm: "Eliminar",
+    deleting: "Eliminando…",
+    cancel: "Cancelar",
+    error: "No pudimos eliminar el anuncio.",
+  },
 } as const;

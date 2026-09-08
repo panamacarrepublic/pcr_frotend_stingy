@@ -9,6 +9,7 @@ import type {
   ListingStatusUpdate,
   ListingUpdate,
 } from "@/modules/listings/api/types";
+import { uploadListingPhotos } from "@/modules/listings/lib/uploadListingPhotos";
 
 export interface UpdateListingVariables {
   listingId: string;
@@ -20,7 +21,15 @@ export interface UpdateListingVariables {
  *
  * Partial by omission: only the keys you send are touched. Note that `photos` is
  * a total replacement — sending it deletes every existing photo and re-inserts
- * the array you provide, so there's no way to append a single photo.
+ * the array you provide, so there's no way to append a single photo. Callers
+ * must therefore send the complete final gallery or omit the key entirely; see
+ * `toListingUpdatePayload`, which does exactly that.
+ *
+ * When the patch does carry photos, they are uploaded to Supabase Storage first
+ * — the same reason as `useCreateListing`: newly picked files arrive as `blob:`
+ * URLs that resolve only in the current tab, and the backend stores the string
+ * verbatim. Already-hosted URLs pass through `uploadListingPhotos` untouched, so
+ * an unchanged photo survives the round trip without being re-uploaded.
  *
  * The response is written straight into the detail cache (it's the full
  * `ListingResponse`), and the lists are invalidated because title, price, cover
@@ -30,7 +39,11 @@ export function useUpdateListing() {
   const queryClient = useQueryClient();
 
   return useMutation<ListingResponse, Error, UpdateListingVariables>({
-    mutationFn: ({ listingId, patch }) => updateListing(listingId, patch),
+    mutationFn: async ({ listingId, patch }) => {
+      if (!patch.photos) return updateListing(listingId, patch);
+      const photos = await uploadListingPhotos(patch.photos);
+      return updateListing(listingId, { ...patch, photos });
+    },
     onSuccess: (listing) => {
       queryClient.setQueryData(listingKeys.detail(listing.id), listing);
       queryClient.invalidateQueries({ queryKey: listingKeys.feeds() });

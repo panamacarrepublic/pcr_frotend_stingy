@@ -27,6 +27,9 @@ export const tokens = {
     naranja: { main: "#e15c2b", lighter: "#ffd9c7", darkest: "#4d1c0a" },
     azul: { main: "#3a86ff", lighter: "#a3c7ff", lightest: "#ecf3ff", darkest: "#132e66" },
     verde: { main: "#06893c", lightest: "#e6f7ec" },
+    // Figma variable "Color/Amarillo Vibrante Light" — the primary action fill
+    // on the listing detail panel (node 10694:4070, "Editar Completo").
+    amarilloVibrante: { light: "#ffd666" },
     neutralDark: "#505051",
     neutral: "#828283",
     thunderLightest: "#e9e8e8",

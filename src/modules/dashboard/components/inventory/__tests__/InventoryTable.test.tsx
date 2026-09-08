@@ -29,7 +29,14 @@ const noop = () => {};
 
 test("renders the six columns from the design", () => {
   render(
-    <InventoryTable items={[listing()]} selectedIds={[]} onToggleRow={noop} onToggleAll={noop} />,
+    <InventoryTable
+      items={[listing()]}
+      selectedIds={[]}
+      onToggleRow={noop}
+      onToggleAll={noop}
+      onOpenDetails={noop}
+      onDelete={noop}
+    />,
   );
 
   ["Date", "ID de Producto", "Nombre", "Categoría", "Precio"].forEach((label) => {
@@ -44,6 +51,8 @@ test("price arrives as a decimal string and is formatted as currency", () => {
       selectedIds={[]}
       onToggleRow={noop}
       onToggleAll={noop}
+      onOpenDetails={noop}
+      onDelete={noop}
     />,
   );
 
@@ -59,6 +68,8 @@ test("a malformed price renders a dash rather than NaN", () => {
       selectedIds={[]}
       onToggleRow={noop}
       onToggleAll={noop}
+      onOpenDetails={noop}
+      onDelete={noop}
     />,
   );
 
@@ -67,7 +78,14 @@ test("a malformed price renders a dash rather than NaN", () => {
 
 test("the ID column shows a readable prefix of the real UUID", () => {
   render(
-    <InventoryTable items={[listing()]} selectedIds={[]} onToggleRow={noop} onToggleAll={noop} />,
+    <InventoryTable
+      items={[listing()]}
+      selectedIds={[]}
+      onToggleRow={noop}
+      onToggleAll={noop}
+      onOpenDetails={noop}
+      onDelete={noop}
+    />,
   );
 
   expect(screen.getByText("a3f9c210")).toBeInTheDocument();
@@ -75,7 +93,14 @@ test("the ID column shows a readable prefix of the real UUID", () => {
 
 test("created_at is rendered as a date, not a raw ISO string", () => {
   render(
-    <InventoryTable items={[listing()]} selectedIds={[]} onToggleRow={noop} onToggleAll={noop} />,
+    <InventoryTable
+      items={[listing()]}
+      selectedIds={[]}
+      onToggleRow={noop}
+      onToggleAll={noop}
+      onOpenDetails={noop}
+      onDelete={noop}
+    />,
   );
 
   expect(screen.getByText("05/17/2026")).toBeInTheDocument();
@@ -92,6 +117,8 @@ test("row and header checkboxes report selection to the caller", () => {
       selectedIds={[]}
       onToggleRow={onToggleRow}
       onToggleAll={onToggleAll}
+      onOpenDetails={noop}
+      onDelete={noop}
     />,
   );
 
@@ -111,6 +138,8 @@ test("the header checkbox is indeterminate on a partial selection", () => {
       selectedIds={[items[0].id]}
       onToggleRow={noop}
       onToggleAll={noop}
+      onOpenDetails={noop}
+      onDelete={noop}
     />,
   );
 
@@ -129,6 +158,8 @@ test("the header checkbox is checked once every row on the page is selected", ()
       selectedIds={items.map((i) => i.id)}
       onToggleRow={noop}
       onToggleAll={noop}
+      onOpenDetails={noop}
+      onDelete={noop}
     />,
   );
 
@@ -137,13 +168,88 @@ test("the header checkbox is checked once every row on the page is selected", ()
   expect(selectAll).toHaveAttribute("data-indeterminate", "false");
 });
 
-test("row action buttons render but stay disabled — no actions are wired yet", () => {
+test("the settings button opens the quick view for that row's listing", () => {
+  const onOpenDetails = jest.fn();
+  const item = listing();
+
   render(
-    <InventoryTable items={[listing()]} selectedIds={[]} onToggleRow={noop} onToggleAll={noop} />,
+    <InventoryTable
+      items={[item]}
+      selectedIds={[]}
+      onToggleRow={noop}
+      onToggleAll={noop}
+      onOpenDetails={onOpenDetails}
+      onDelete={noop}
+    />,
   );
 
-  expect(screen.getByLabelText("Ajustes del anuncio")).toBeDisabled();
-  expect(screen.getByLabelText("Eliminar anuncio")).toBeDisabled();
+  const settings = screen.getByLabelText("Ajustes del anuncio");
+  expect(settings).toBeEnabled();
+  fireEvent.click(settings);
+  expect(onOpenDetails).toHaveBeenCalledWith(item);
+});
+
+test("the delete button asks to delete that row's listing", () => {
+  const onDelete = jest.fn();
+  const item = listing();
+
+  render(
+    <InventoryTable
+      items={[item]}
+      selectedIds={[]}
+      onToggleRow={noop}
+      onToggleAll={noop}
+      onOpenDetails={noop}
+      onDelete={onDelete}
+    />,
+  );
+
+  const remove = screen.getByLabelText("Eliminar anuncio");
+  expect(remove).toBeEnabled();
+  fireEvent.click(remove);
+  expect(onDelete).toHaveBeenCalledWith(item);
+});
+
+// Deleting is a soft delete, not a PATCH, so the statuses that reject edits
+// (sold / expired / rejected) can still be removed from the inventory.
+test("a sold listing can still be opened and deleted", () => {
+  const onOpenDetails = jest.fn();
+  const onDelete = jest.fn();
+
+  render(
+    <InventoryTable
+      items={[listing({ status: "sold" })]}
+      selectedIds={[]}
+      onToggleRow={noop}
+      onToggleAll={noop}
+      onOpenDetails={onOpenDetails}
+      onDelete={onDelete}
+    />,
+  );
+
+  expect(screen.getByLabelText("Ajustes del anuncio")).toBeEnabled();
+  expect(screen.getByLabelText("Eliminar anuncio")).toBeEnabled();
+});
+
+// The row itself is a click target in the design ("cursor pointer", whole row
+// highlights), so the action buttons must not double-fire it.
+test("clicking a row opens its quick view", () => {
+  const onOpenDetails = jest.fn();
+  const item = listing();
+
+  render(
+    <InventoryTable
+      items={[item]}
+      selectedIds={[]}
+      onToggleRow={noop}
+      onToggleAll={noop}
+      onOpenDetails={onOpenDetails}
+      onDelete={noop}
+    />,
+  );
+
+  fireEvent.click(screen.getByRole("row", { name: /Toyota Hilux/ }));
+  expect(onOpenDetails).toHaveBeenCalledWith(item);
 });
 
 test("every listing shows the Vehículos badge, since cars is the only vertical", () => {
@@ -153,6 +259,8 @@ test("every listing shows the Vehículos badge, since cars is the only vertical"
       selectedIds={[]}
       onToggleRow={noop}
       onToggleAll={noop}
+      onOpenDetails={noop}
+      onDelete={noop}
     />,
   );
 
@@ -167,6 +275,8 @@ test("a long title is kept on one line with the full text available on hover", (
       selectedIds={[]}
       onToggleRow={noop}
       onToggleAll={noop}
+      onOpenDetails={noop}
+      onDelete={noop}
     />,
   );
 
@@ -181,6 +291,8 @@ test("selected rows are marked so the blue-50 style applies", () => {
       selectedIds={[item.id]}
       onToggleRow={noop}
       onToggleAll={noop}
+      onOpenDetails={noop}
+      onDelete={noop}
     />,
   );
 

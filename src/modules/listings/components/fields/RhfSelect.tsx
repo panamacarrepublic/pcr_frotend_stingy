@@ -16,6 +16,8 @@ interface RhfSelectProps<T extends FieldValues> {
   info?: string | boolean;
   options: SelectOption[];
   placeholder?: string;
+  /** Appends the design's `*` marker to the label. */
+  required?: boolean;
 }
 
 /** RHF ↔ MUI adapter for a single-choice dropdown with an empty placeholder. */
@@ -25,6 +27,7 @@ export function RhfSelect<T extends FieldValues>({
   info,
   options,
   placeholder,
+  required,
 }: RhfSelectProps<T>) {
   const { control } = useFormContext<T>();
   const ph = placeholder ?? listingMessages.fields.selectPlaceholder;
@@ -33,7 +36,13 @@ export function RhfSelect<T extends FieldValues>({
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <FieldShell label={label} info={info} error={fieldState.error?.message} htmlFor={name}>
+        <FieldShell
+          label={label}
+          info={info}
+          required={required}
+          error={fieldState.error?.message}
+          htmlFor={name}
+        >
           <TextField
             {...field}
             id={name}
