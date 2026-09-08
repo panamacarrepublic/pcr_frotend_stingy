@@ -147,7 +147,7 @@ export default function LoginForm() {
           <Typography variant="body2" color="text.secondary">
             {loginMessages.noAccount}
           </Typography>
-          <Link href="/register" underline="hover" sx={linkSx}>
+          <Link href="/registro" underline="hover" sx={linkSx}>
             <Typography variant="body2" component="span">
               {loginMessages.register}
             </Typography>
