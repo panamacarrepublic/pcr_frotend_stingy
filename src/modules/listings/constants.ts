@@ -1,3 +1,5 @@
+import { PANAMA_PROVINCES } from "@/lib/panama";
+
 import type {
   FuelType,
   ItemCondition,
@@ -10,23 +12,9 @@ export const MAX_PHOTOS = 10;
 export const RECOMMENDED_MIN_PHOTOS = 3;
 export const LISTING_FEE_USD = 5;
 
-// Panama's provinces + comarcas (listing_vehicles.province is free text; the UI
-// constrains it to this list). District stays a free-text input.
-export const PANAMA_PROVINCES = [
-  "Bocas del Toro",
-  "Coclé",
-  "Colón",
-  "Chiriquí",
-  "Darién",
-  "Herrera",
-  "Los Santos",
-  "Panamá",
-  "Panamá Oeste",
-  "Veraguas",
-  "Guna Yala",
-  "Emberá-Wounaan",
-  "Ngäbe-Buglé",
-] as const;
+// Panama's provinces + comarcas now live in `lib/panama` — sign-up needs the
+// same list, and modules must not import each other's internals.
+export { PANAMA_PROVINCES } from "@/lib/panama";
 
 // Enum → Spanish (Panama) labels. Keys are exhaustive over the module enums, so
 // adding a value to enums.ts forces a label here (compile error otherwise).
