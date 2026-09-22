@@ -2,9 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import type { ReferenceOption } from "@pcr/types";
-
 import apiClient from "@/lib/api-client";
+import type { ReferenceOption } from "@/types/reference";
 
 /** Vehicle makes for the wizard dropdown (served from our own DB via FastAPI). */
 export function useMakes() {

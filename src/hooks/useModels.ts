@@ -2,9 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import type { ReferenceOption } from "@pcr/types";
-
 import apiClient from "@/lib/api-client";
+import type { ReferenceOption } from "@/types/reference";
 
 /** Vehicle models for a given make. Disabled until a make is selected. */
 export function useModels(makeId?: string) {
